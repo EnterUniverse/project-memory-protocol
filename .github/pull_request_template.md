@@ -1,21 +1,17 @@
-## Change
+## Summary
 
-Describe the smallest behavior or contract changed.
+What changed, and which problem does it solve?
 
-## Evidence
+## Verification
 
 - [ ] Added or updated tests.
 - [ ] Added a recovery probe when retrieval or memory semantics changed.
 - [ ] Used synthetic fixtures only.
-
-## Integrity and privacy
-
 - [ ] `pytest` passes.
 - [ ] `ruff check .` passes.
 - [ ] `pmem privacy scan .` passes.
-- [ ] No private transcript, project identifier, credential, personal path, or unpublished result is included.
+- [ ] No private material or machine-specific path is included.
 
-## Epistemic effect
+## Notes for reviewers
 
-Explain what becomes more recoverable, which omissions change, and whether any authority boundary is affected.
-
+Call out compatibility changes, new dependencies, format changes, or known limitations.

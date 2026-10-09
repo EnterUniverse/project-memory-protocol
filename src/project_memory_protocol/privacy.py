@@ -51,10 +51,17 @@ def load_blocklist(path: Path | None) -> list[str]:
 
 def scan(root: Path, blocklist_path: Path | None = None) -> list[Finding]:
     root = root.resolve()
+    if not root.exists():
+        raise FileNotFoundError(root)
     blocked = load_blocklist(blocklist_path)
     findings: list[Finding] = []
-    for path in sorted(root.rglob("*")):
-        if not path.is_file() or any(part in {".git", ".venv", "dist", "build"} for part in path.parts):
+    candidates = [root] if root.is_file() else sorted(root.rglob("*"))
+    for path in candidates:
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or any(part in {".git", ".venv", "dist", "build"} for part in path.parts)
+        ):
             continue
         if path.suffix and path.suffix.casefold() not in TEXT_SUFFIXES:
             continue
@@ -63,21 +70,32 @@ def scan(root: Path, blocklist_path: Path | None = None) -> list[Finding]:
         except UnicodeDecodeError:
             continue
         for line_number, line in enumerate(lines, 1):
+            redacted = line
+            for pattern in BUILTIN_RULES.values():
+                redacted = pattern.sub("[REDACTED]", redacted)
+            for private_term in blocked:
+                redacted = re.sub(
+                    re.escape(private_term), "[REDACTED]", redacted, flags=re.IGNORECASE
+                )
             for rule, pattern in BUILTIN_RULES.items():
                 if pattern.search(line):
                     findings.append(
-                        Finding(str(path.relative_to(root)), line_number, rule, line.strip()[:200])
+                        Finding(
+                            path.name if root.is_file() else str(path.relative_to(root)),
+                            line_number,
+                            rule,
+                            redacted.strip()[:200],
+                        )
                     )
             folded = line.casefold()
             for private_term in blocked:
                 if private_term.casefold() in folded:
                     findings.append(
                         Finding(
-                            str(path.relative_to(root)),
+                            path.name if root.is_file() else str(path.relative_to(root)),
                             line_number,
                             "private-blocklist",
-                            line.strip()[:200],
+                            redacted.strip()[:200],
                         )
                     )
     return findings
-

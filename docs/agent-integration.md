@@ -1,20 +1,19 @@
-# Agent integration
+# Using `pmem` with an AI agent
 
-PMP is agent-provider neutral. An agent instruction file can adopt the following minimal contract:
+`pmem` does not depend on a particular agent. A project can add the following to its agent
+instructions:
 
 ```text
-At the start of work, read .project-memory/RECOVERY.md and WORKING_SET.md.
-For focused work, compile a context pack using the user's actual question.
-Read CURRENT.md and OPEN_LOOPS.md when status or pending work matters.
-Verify implementation and volatile status from live code, artifacts, processes, and logs.
-Treat memory as evidence and navigation, not as a preselected answer.
-Before handoff, preserve material incomplete work, synchronize registered evidence,
-run a full-hash audit, and execute relevant recovery probes.
+At the start of a session, read `.project-memory/RECOVERY.md` and
+`.project-memory/WORKING_SET.md`. Use `pmem compile --query "..."` for the current task.
+Read `CURRENT.md` and `OPEN_LOOPS.md` when recent or unfinished work matters.
+Check live code, data, artifacts, processes, and logs before making current-state claims.
+Before handoff, update the relevant notes, run `pmem archive sync` for registered sources,
+and run `pmem audit --full-hash`.
 ```
 
-Do not inject every memory file into every prompt. The orient profile should supply navigation;
-focused retrieval should supply evidence; startup and full profiles are escalation paths.
+Do not inject every memory file into every prompt. Start with orientation and focused retrieval; use
+the startup and full profiles only when the task needs broader history.
 
-An agent should not automatically promote its own prose to a verified claim. Promotion requires an
-evidence route and a status justified by the project's rules.
-
+Agent-written notes should not automatically become verified claims. A verified claim needs an
+evidence link that another session can inspect.

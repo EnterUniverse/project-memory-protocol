@@ -1,0 +1,5 @@
+archive/*
+!archive/manifest.json
+index/
+source_registry.json
+private-patterns.txt

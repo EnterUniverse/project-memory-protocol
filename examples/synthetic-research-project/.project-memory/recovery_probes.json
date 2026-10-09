@@ -1,0 +1,10 @@
+{
+  "schema": "pmem.probes.v1",
+  "probes": [
+    {
+      "name": "hyphenated-label failure",
+      "query": "hyphenated color names",
+      "require_all": ["token-boundary rule", "hyphenated label"]
+    }
+  ]
+}

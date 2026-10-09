@@ -3,27 +3,33 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
       - run: ruff check .
-      - run: pytest
+      - run: ruff format --check .
+      - run: python -m pytest
       - name: CLI smoke test
         run: |
           workdir="$(mktemp -d)"
@@ -32,16 +38,38 @@ jobs:
           pmem index
           pmem compile --profile orient --token-budget 2000 >/dev/null
           pmem audit --full-hash
+      - name: Example project
+        working-directory: examples/synthetic-research-project
+        run: |
+          pmem index
+          pmem drill
+          pmem audit --full-hash
 
   privacy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: python -m pip install -e .
       - run: pmem privacy scan .
 
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Install and run the wheel
+        run: |
+          python -m venv /tmp/pmem-wheel-test
+          /tmp/pmem-wheel-test/bin/pip install dist/*.whl
+          /tmp/pmem-wheel-test/bin/pmem --version

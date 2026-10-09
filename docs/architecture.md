@@ -1,13 +1,13 @@
-# Architecture
+# Design
 
-## Separation of concerns
+## Responsibilities
 
-PMP separates four operations that are often conflated:
+`pmem` keeps four jobs separate:
 
-1. **Preservation** copies explicitly registered evidence into an immutable hash-linked archive.
-2. **Interpretation** maintains human-readable current state, topic modules, decisions, and stages.
-3. **Retrieval** builds a disposable lexical index and compiles question-scoped context packs.
-4. **Verification** checks structure, archive integrity, privacy indicators, and recovery behavior.
+1. **Preservation** copies explicitly registered sources into a hash-linked archive.
+2. **Project notes** keep current state, decisions, topics, and completed work readable.
+3. **Retrieval** builds a disposable search index and assembles task-specific context.
+4. **Checks** validate structure, archive integrity, privacy findings, and retrieval behavior.
 
 No derived operation mutates the source archive.
 
@@ -18,13 +18,13 @@ append-only extension whose old prefix hash still matches, PMP stores only the n
 prefix changed, PMP stores another full snapshot. Each record links to the previous archive path
 and hash.
 
-This establishes byte-level ancestry without claiming that the source itself was complete or
-authentic.
+This records the byte-level history of captured files. It does not establish whether a source was
+complete or trustworthy.
 
 ## Retrieval
 
 Markdown is chunked by heading. JSONL archive records are extracted as bounded text chunks.
-SQLite FTS5 ranks matches, with a small authority prior for curated material and claims.
+SQLite FTS5 ranks matches, with maintained project notes and claims ranked ahead of raw archives.
 
 Context compilation begins with mandatory profile files, adds topic routes and query results,
 then applies a token estimate and per-tier quotas. Every omitted result remains in metadata with a
@@ -32,6 +32,5 @@ source locator and omission reason. The `full` profile does not drop curated fil
 
 ## Portability
 
-Core state uses Markdown, JSON, JSONL, TOML, SHA-256, and SQLite. Provider-specific transcript
-adapters can improve extraction, but the archive and generic JSON traversal do not require one.
-
+Core state uses Markdown, JSON, JSONL, TOML, SHA-256, and SQLite. The archive does not depend on a
+particular model provider or conversation format.

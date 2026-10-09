@@ -1,4 +1,4 @@
-# File and claim schema
+# File format reference
 
 ## Project configuration
 
@@ -18,8 +18,8 @@ Each archive record contains:
 - previous archive path and hash;
 - UTC capture timestamp.
 
-The manifest proves integrity and ancestry for captured bytes. It does not prove that the original
-source was complete or trustworthy.
+The manifest can detect later changes to captured bytes and records their ancestry. It does not
+prove that the original source was complete or trustworthy.
 
 ## Claims
 
@@ -46,4 +46,3 @@ underlying event happened.
 A context pack begins with `pmem.context-pack.v1` metadata. `selected` records source locators and
 hashes. `omitted_retrievable` records candidates excluded by token budget or tier quota. Consumers
 should retain this metadata when passing the text between agents.
-

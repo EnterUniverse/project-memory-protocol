@@ -1,16 +1,16 @@
-# Synthetic research project
+# Example: color-name parser
 
-This fictional example studies whether a deterministic parser can recover color names from short
-sentences. It exists only to demonstrate memory structure; it contains no real user or project data.
+This small fictional project shows a populated `.project-memory/` directory. It studies whether a
+deterministic parser can recover color names from short sentences; all content is synthetic.
 
-Suggested exercise:
+From this directory, try:
 
 ```bash
-cp -R examples/synthetic-research-project /tmp/color-parser-study
-cd /tmp/color-parser-study
-pmem init
+pmem index
+pmem compile --query "What is still wrong with hyphenated color names?"
+pmem drill
+pmem audit --full-hash
 ```
 
-Add the statement “The baseline misses hyphenated color names” to `CURRENT.md`, record it as a
-hypothesis, index the memory, and create a recovery probe for “hyphenated colors”.
-
+The query should recover both the active finding and the decision behind the current parser. The
+recovery drill checks that this path remains searchable.

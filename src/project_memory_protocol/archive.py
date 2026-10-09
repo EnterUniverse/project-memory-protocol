@@ -59,9 +59,7 @@ def sync_archive(settings: Settings) -> dict:
     registry = load_json(
         settings.source_registry_path, {"schema": "pmem.sources.v1", "sources": []}
     )
-    manifest = load_json(
-        settings.manifest_path, {"schema": "pmem.archive.v1", "records": []}
-    )
+    manifest = load_json(settings.manifest_path, {"schema": "pmem.archive.v1", "records": []})
     records = manifest.setdefault("records", [])
     latest: dict[str, dict] = {}
     for row in records:
@@ -161,9 +159,8 @@ def archive_errors(settings: Settings, full_hash: bool) -> list[str]:
                 errors.append(f"broken archive ancestry: {relative} -> {previous_path}")
             elif previous.get("sha256") != row.get("previous_sha256"):
                 errors.append(f"archive ancestry hash mismatch: {relative} -> {previous_path}")
-            elif (
-                row.get("capture_mode") == "append_delta"
-                and row.get("source_offset_start") != previous.get("source_offset_end")
-            ):
+            elif row.get("capture_mode") == "append_delta" and row.get(
+                "source_offset_start"
+            ) != previous.get("source_offset_end"):
                 errors.append(f"archive delta offset discontinuity: {relative}")
     return errors

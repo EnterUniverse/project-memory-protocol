@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 import sqlite3
@@ -92,16 +91,13 @@ def build_index(settings: Settings, include_archive: bool = False) -> dict:
         raise RuntimeError("SQLite FTS5 support is required") from error
 
     rows: list[tuple[str, str, str, int, str, str]] = []
-    seen_text: set[str] = set()
     for path in curated_markdown(settings):
         relative = str(path.relative_to(settings.memory_root))
         tier = "stage" if "stages" in path.parts else "curated"
         authority = 80 if "modules" in path.parts else 70
         digest = sha256_file(path)
         for heading, line_number, text in markdown_chunks(path):
-            text_hash = hashlib.sha256(text.encode()).hexdigest()
-            if text and text_hash not in seen_text:
-                seen_text.add(text_hash)
+            if text:
                 rows.append((relative, f"{heading}@L{line_number}", tier, authority, digest, text))
 
     if settings.claims_path.is_file():
@@ -128,15 +124,12 @@ def build_index(settings: Settings, include_archive: bool = False) -> dict:
             if not path.is_file() or path.suffix.casefold() not in {".jsonl", ".json"}:
                 continue
             for locator, text in extract_jsonl(path):
-                text_hash = hashlib.sha256(text.encode()).hexdigest()
-                if text_hash in seen_text:
-                    continue
-                seen_text.add(text_hash)
-                rows.append((record["archive_path"], locator, "archive", 45, record["sha256"], text))
+                rows.append(
+                    (record["archive_path"], locator, "archive", 45, record["sha256"], text)
+                )
 
     database.executemany(
-        "INSERT INTO chunks(source,locator,tier,authority,source_sha256,text) "
-        "VALUES(?,?,?,?,?,?)",
+        "INSERT INTO chunks(source,locator,tier,authority,source_sha256,text) VALUES(?,?,?,?,?,?)",
         rows,
     )
     database.execute("INSERT INTO chunks_fts(chunks_fts) VALUES('rebuild')")
@@ -171,4 +164,3 @@ def retrieve(settings: Settings, query: str, limit: int = 60) -> list[dict]:
     ).fetchall()
     database.close()
     return [dict(row) for row in rows]
-

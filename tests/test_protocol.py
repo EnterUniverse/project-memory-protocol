@@ -115,6 +115,15 @@ def test_claim_validation_requires_evidence_for_verified_claims(tmp_path: Path):
     assert validate_claims(settings) == []
 
 
+def test_claim_rejects_empty_text_and_invalid_dates(tmp_path: Path):
+    settings = settings_for(tmp_path)
+    with pytest.raises(ValueError, match="must not be empty"):
+        add_claim(settings, "hypothesis", "   ", [])
+    with pytest.raises(ValueError, match="invalid verification date"):
+        add_claim(settings, "hypothesis", "A testable idea.", [], verified_at="2026-99-99")
+    assert validate_claims(settings) == []
+
+
 def test_privacy_scanner_supports_builtin_rules_and_private_blocklist(tmp_path: Path):
     tree = tmp_path / "release"
     tree.mkdir()
@@ -124,6 +133,68 @@ def test_privacy_scanner_supports_builtin_rules_and_private_blocklist(tmp_path: 
     blocklist.write_text("ORCHID-CODENAME\n")
     findings = scan(tree, blocklist)
     assert {finding.rule for finding in findings} == {"email", "private-blocklist"}
+    assert all(private_email not in finding.excerpt for finding in findings)
+    assert all("ORCHID-CODENAME" not in finding.excerpt for finding in findings)
+
+
+def test_privacy_scanner_does_not_follow_symlinks(tmp_path: Path):
+    outside = tmp_path / "outside.txt"
+    fake_token = "ghp_" + "abcdefghijklmnopqrstuvwxyz1234567890"
+    outside.write_text(f"token = {fake_token}\n")
+    tree = tmp_path / "release"
+    tree.mkdir()
+    (tree / "linked.txt").symlink_to(outside)
+    assert scan(tree) == []
+
+
+def test_duplicate_text_keeps_each_source_locator(tmp_path: Path):
+    settings = settings_for(tmp_path)
+    repeated = "# Shared finding\n\nThe indigo result was reproduced.\n"
+    (settings.memory_root / "modules" / "first.md").write_text(repeated)
+    (settings.memory_root / "modules" / "second.md").write_text(repeated)
+    build_index(settings)
+    sources = {row["source"] for row in retrieve(settings, "indigo reproduced")}
+    assert {"modules/first.md", "modules/second.md"} <= sources
+
+
+def test_memory_directory_cannot_escape_project(tmp_path: Path):
+    initialize(tmp_path)
+    config = tmp_path / ".project-memory.toml"
+    config.write_text(
+        config.read_text().replace('directory = ".project-memory"', 'directory = "../private"')
+    )
+    with pytest.raises(ValueError, match="inside the project root"):
+        load_settings(tmp_path)
+
+
+def test_profile_paths_must_be_arrays(tmp_path: Path):
+    initialize(tmp_path)
+    config = tmp_path / ".project-memory.toml"
+    config.write_text(
+        config.read_text().replace(
+            'orient = ["RECOVERY.md", "WORKING_SET.md"]', 'orient = "RECOVERY.md"'
+        )
+    )
+    with pytest.raises(TypeError, match="profiles.orient"):
+        load_settings(tmp_path)
+
+
+def test_context_budget_must_be_positive(tmp_path: Path):
+    settings = settings_for(tmp_path)
+    with pytest.raises(ValueError, match="must be positive"):
+        compile_context(settings, "orient", None, None, token_budget=0)
+
+
+def test_recovery_drill_reports_invalid_probe_files(tmp_path: Path):
+    settings = settings_for(tmp_path)
+    (settings.memory_root / "recovery_probes.json").write_text('{"probes":[{}]}')
+    with pytest.raises(ValueError, match="non-empty query"):
+        run_drill(settings)
+
+
+def test_privacy_scan_requires_an_existing_path(tmp_path: Path):
+    with pytest.raises(FileNotFoundError):
+        scan(tmp_path / "missing")
 
 
 def test_recovery_drill_is_project_defined(tmp_path: Path):
@@ -143,7 +214,9 @@ def test_recovery_drill_is_project_defined(tmp_path: Path):
     }
     (settings.memory_root / "recovery_probes.json").write_text(json.dumps(probes))
     build_index(settings)
-    assert run_drill(settings)["status"] == "passed"
+    result = run_drill(settings)
+    assert result["status"] == "passed"
+    assert len(result["probes"][0]["top_sources"]) == len(set(result["probes"][0]["top_sources"]))
 
 
 def test_audit_detects_archive_tampering(tmp_path: Path):

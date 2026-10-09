@@ -36,9 +36,14 @@ def profile_paths(settings: Settings, profile: str, topic: str | None) -> list[P
         raise ValueError(f"unknown profile: {profile}")
     if topic:
         try:
-            topic_path = settings.memory_root / settings.topics[topic]
+            topic_relative = settings.topics[topic]
         except KeyError as error:
             raise ValueError(f"unknown topic: {topic}") from error
+        topic_path = (settings.memory_root / topic_relative).resolve()
+        try:
+            topic_path.relative_to(settings.memory_root)
+        except ValueError as error:
+            raise ValueError(f"topic path escapes the memory directory: {topic}") from error
         if topic_path.is_file():
             paths.append(topic_path)
     return list(dict.fromkeys(paths))
@@ -51,15 +56,15 @@ def compile_context(
     topic: str | None,
     token_budget: int | None,
 ) -> str:
-    budget = token_budget or settings.default_budget
+    budget = settings.default_budget if token_budget is None else token_budget
+    if budget <= 0:
+        raise ValueError("token budget must be positive")
     mandatory = profile_paths(settings, profile, topic)
     candidates = render_files(settings, mandatory)
     if query:
         candidates.extend(retrieve(settings, query))
 
-    complete_sources = {
-        row["source"] for row in candidates if row["locator"] == "complete-file"
-    }
+    complete_sources = {row["source"] for row in candidates if row["locator"] == "complete-file"}
     mandatory_sources = {str(path.relative_to(settings.memory_root)) for path in mandatory}
     selected: list[dict] = []
     omitted: list[dict] = []

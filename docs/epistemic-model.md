@@ -1,6 +1,7 @@
-# Epistemic model
+# Claim states
 
-PMP uses explicit claim states because “remembered” is not a sufficient epistemic category.
+An item appearing in project memory does not make it true. Claims can therefore carry one of these
+states:
 
 | Status | Meaning |
 |---|---|
@@ -11,7 +12,7 @@ PMP uses explicit claim states because “remembered” is not a sufficient epis
 | `rejected` | A tested or reasoned route that was not accepted within its recorded boundary |
 | `superseded` | A former claim replaced by a later claim without deleting its history |
 
-Verification is scoped. A passing unit test does not verify deployment state; a transcript does not
+Verification has a scope. A passing unit test does not verify deployment state; a conversation does not
 verify implementation; a paper does not prove that local code implements the paper.
 
 The system therefore keeps three authorities separate:
@@ -20,6 +21,5 @@ The system therefore keeps three authorities separate:
 - curated memory establishes the current interpretation and navigation map;
 - live project evidence establishes present implementation and volatile status.
 
-This separation is intended to reduce two opposing failures: forgetting causal history and becoming
-anchored to an obsolete historical conclusion.
-
+Keeping these roles separate helps preserve useful history without treating an old conclusion as
+current fact.

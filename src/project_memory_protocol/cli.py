@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from importlib.metadata import version
 from pathlib import Path
 
 from .archive import register_source, sync_archive
@@ -18,8 +19,9 @@ from .templates import initialize
 
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(
-        prog="pmem", description="Evidence-grounded project memory for long-horizon agents."
+        prog="pmem", description="Keep project context across AI-assisted work."
     )
+    root.add_argument("--version", action="version", version=version("project-memory-protocol"))
     commands = root.add_subparsers(dest="command", required=True)
 
     init = commands.add_parser("init", help="initialize memory files in a project")
@@ -40,7 +42,9 @@ def parser() -> argparse.ArgumentParser:
     index.add_argument("--include-archive", action="store_true")
 
     compile_command = commands.add_parser("compile", help="compile a context pack")
-    compile_command.add_argument("--profile", choices=("orient", "startup", "full"), default="orient")
+    compile_command.add_argument(
+        "--profile", choices=("orient", "startup", "full"), default="orient"
+    )
     compile_command.add_argument("--topic")
     compile_command.add_argument("--query")
     compile_command.add_argument("--token-budget", type=int)
@@ -131,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
             result = run_drill(settings)
             emit(result)
             return 0 if result["status"] == "passed" else 1
-    except (FileNotFoundError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
+    except (OSError, TypeError, ValueError, RuntimeError, json.JSONDecodeError) as error:
         print(f"pmem: {error}", file=sys.stderr)
         return 2
     return 2

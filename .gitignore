@@ -6,4 +6,5 @@ __pycache__/
 build/
 dist/
 *.egg-info/
-
+examples/**/.project-memory/index/
+examples/**/.project-memory/source_registry.json

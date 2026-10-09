@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If this software supports your research, please cite the software release."
-title: "Project Memory Protocol: Evidence-Grounded Memory for Long-Horizon Agents"
+message: "If you use this software in published work, please cite the software release."
+title: "Project Memory Protocol"
 type: software
 version: 0.1.0
 date-released: 2026-10-09

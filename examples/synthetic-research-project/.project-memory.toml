@@ -1,0 +1,13 @@
+[memory]
+directory = ".project-memory"
+
+[profiles]
+orient = ["RECOVERY.md", "WORKING_SET.md"]
+startup = ["RECOVERY.md", "WORKING_SET.md", "CURRENT.md", "OPEN_LOOPS.md", "DECISIONS.md"]
+full_extra = ["PROJECT_NARRATIVE.md", "claims/CLAIMS.jsonl", "modules/*.md", "stages/*.md"]
+
+[retrieval]
+default_token_budget = 4000
+
+[topics]
+parser = "modules/PARSER.md"

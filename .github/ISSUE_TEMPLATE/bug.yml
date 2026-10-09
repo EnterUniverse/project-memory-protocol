@@ -27,8 +27,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: epistemic-impact
+    id: impact
     attributes:
-      label: Recovery or integrity impact
-      description: Could this lose evidence, misstate authority, or hide an omission?
-
+      label: Impact
+      description: Could this lose source material, return misleading context, or expose private data?

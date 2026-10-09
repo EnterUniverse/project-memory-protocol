@@ -59,4 +59,3 @@ def resolve_inside(root: Path, relative: str) -> Path:
     candidate = (root / relative).resolve()
     candidate.relative_to(root.resolve())
     return candidate
-

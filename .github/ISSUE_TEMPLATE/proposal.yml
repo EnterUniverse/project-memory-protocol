@@ -1,25 +1,24 @@
-name: Design proposal
-description: Propose a scoped change to the memory model or tooling.
-title: "[Proposal]: "
-labels: [design]
+name: Feature request
+description: Propose a focused improvement to the tool or file formats.
+title: "[Feature]: "
+labels: [enhancement]
 body:
   - type: textarea
     id: failure
     attributes:
-      label: Observed failure mode
-      description: Which real recovery behavior is inadequate?
+      label: Problem
+      description: What is difficult or impossible today?
     validations:
       required: true
   - type: textarea
     id: evidence
     attributes:
-      label: Synthetic example or recovery probe
+      label: Minimal example
     validations:
       required: true
   - type: textarea
     id: tradeoffs
     attributes:
-      label: Fidelity, privacy, and complexity trade-offs
+      label: Alternatives and trade-offs
     validations:
       required: true
-

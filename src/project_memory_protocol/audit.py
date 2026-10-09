@@ -39,4 +39,3 @@ def audit(
         "privacy_findings": privacy_findings,
         "full_hash": full_hash,
     }
-

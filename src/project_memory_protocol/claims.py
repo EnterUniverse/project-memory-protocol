@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from .config import Settings
@@ -57,7 +57,9 @@ def validate_claims(settings: Settings) -> list[str]:
             evidence = []
         if row.get("status") in {"verified", "user_constraint"} and not evidence:
             errors.append(f"claim lacks evidence: {identifier}")
-        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(row.get("verified_at", ""))):
+        try:
+            date.fromisoformat(str(row.get("verified_at", "")))
+        except ValueError:
             errors.append(f"invalid verification date: {identifier}")
         for field in ("supersedes", "superseded_by"):
             if not isinstance(row.get(field, []), list):
@@ -88,18 +90,26 @@ def add_claim(
 ) -> dict:
     if status not in VALID_STATUSES:
         raise ValueError(f"invalid status: {status}")
+    if not claim.strip():
+        raise ValueError("claim must not be empty")
     if status in {"verified", "user_constraint"} and not evidence:
         raise ValueError(f"{status} claims require evidence")
+    verification_date = verified_at or datetime.now(UTC).date().isoformat()
+    try:
+        date.fromisoformat(verification_date)
+    except ValueError as error:
+        raise ValueError(f"invalid verification date: {verification_date}") from error
     claims, errors = load_claims(settings.claims_path)
+    errors.extend(validate_claims(settings))
     if errors:
-        raise ValueError("claims ledger is invalid: " + "; ".join(errors))
+        raise ValueError("claims ledger is invalid: " + "; ".join(dict.fromkeys(errors)))
     highest = max((int(str(row["id"])[1:]) for row in claims), default=0)
     row = {
         "id": f"C{highest + 1:04d}",
         "status": status,
         "claim": claim.strip(),
         "evidence": evidence,
-        "verified_at": verified_at or datetime.now(UTC).date().isoformat(),
+        "verified_at": verification_date,
         "supersedes": [],
         "superseded_by": [],
     }

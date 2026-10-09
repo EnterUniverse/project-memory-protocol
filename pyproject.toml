@@ -4,11 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "project-memory-protocol"
-version = "0.1.0"
-description = "Evidence-grounded, provenance-linked project memory for long-horizon agents."
+dynamic = ["version"]
+description = "Local project memory for AI-assisted work."
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "Jinyu Xu" }]
 keywords = ["agents", "memory", "provenance", "reproducibility", "research"]
 classifiers = [
@@ -17,6 +18,8 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Version Control",
 ]
 dependencies = []
@@ -28,11 +31,34 @@ dev = ["build>=1.2", "pytest>=8", "ruff>=0.6", "twine>=5"]
 pmem = "project_memory_protocol.cli:main"
 
 [project.urls]
+Homepage = "https://github.com/EnterUniverse/project-memory-protocol"
 Documentation = "https://github.com/EnterUniverse/project-memory-protocol#readme"
 Issues = "https://github.com/EnterUniverse/project-memory-protocol/issues"
+Changelog = "https://github.com/EnterUniverse/project-memory-protocol/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/project_memory_protocol/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/project_memory_protocol"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/NOTICE",
+  "/README.md",
+  "/README.zh-CN.md",
+  "/docs",
+  "/examples",
+  "/pyproject.toml",
+  "/src",
+  "/tests",
+]
+exclude = [
+  "/examples/**/.project-memory/index",
+  "/examples/**/.project-memory/source_registry.json",
+]
 
 [tool.pytest.ini_options]
 addopts = "-q"
