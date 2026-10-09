@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If this software supports your research, please cite the software release."
+title: "Project Memory Protocol: Evidence-Grounded Memory for Long-Horizon Agents"
+type: software
+version: 0.1.0
+date-released: 2026-10-09
+authors:
+  - family-names: "Xu"
+    given-names: "Jinyu"
+    alias: "EnterUniverse"
+repository-code: "https://github.com/EnterUniverse/project-memory-protocol"
+license: Apache-2.0

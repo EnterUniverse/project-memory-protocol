@@ -1,0 +1,25 @@
+name: Design proposal
+description: Propose a scoped change to the memory model or tooling.
+title: "[Proposal]: "
+labels: [design]
+body:
+  - type: textarea
+    id: failure
+    attributes:
+      label: Observed failure mode
+      description: Which real recovery behavior is inadequate?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Synthetic example or recovery probe
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Fidelity, privacy, and complexity trade-offs
+    validations:
+      required: true
+

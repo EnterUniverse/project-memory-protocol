@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible defect in preservation, retrieval, validation, or the CLI.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach private transcripts, credentials, or unpublished project memory.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal synthetic reproduction
+      description: Provide commands and synthetic inputs only.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: PMP and Python versions
+    validations:
+      required: true
+  - type: textarea
+    id: epistemic-impact
+    attributes:
+      label: Recovery or integrity impact
+      description: Could this lose evidence, misstate authority, or hide an omission?
+
